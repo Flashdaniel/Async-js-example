@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Count</title>
+    </head>
+    <body>
+        <h1>COUNT</h1>
+        <button>count</button>
+        <h4 id="progress"></h4>
+        <h3 id="time"></h3>
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+        <script>
+            const timeDisplay = document.querySelector('#time');
+            let i = 0;
+            const start = Date.now();
+
+            document.querySelector('button').onclick = function onclick(event) {
+                if (i == 1e9) {
+                    i = 0;
+                    timeDisplay.textContent = '';
+                }
+                count();
+            }
+
+            function count() {
+                document.querySelector('#progress').textContent = i;
+
+                if (i == 1e9) {
+                    timeDisplay.textContent = (
+                    `Done in ${Date.now() - start}ms`
+                   );
+                   return;
+                } else {
+                    setTimeout( count );
+                }
+
+                do {
+                    i++;
+                } while( i % 1e6 != 0);
+            }
+
+            function run(f) {
+                var args = [...arguments].slice( 1 );
+                
+                var it = f( ...args );
+                
+                return Promise.resolve()
+                .then( function handleNext(value) {
+                    var next = it.next( value );
+                    
+                    return (function handleResult(next) {
+                    if (next.done) return next.value;
+                    
+                    return Promise.resolve( next.value )
+                    .then( handleNext, function handleError(err) {
+                        return Promise.resolve( it.throw( err ) );
+                    } )
+                    }(next));
+                } );
+                }
+
+                function *foo(val) {
+                    if (val > 1) {
+                        // generator recursion
+                        val  = yield *foo( val - 1 );
+                    }
+                    var resp = yield fetch( "https://swapi.dev/api/people/" + val );
+                    return resp.json();
+                }
+
+                function *bar() { 
+                    var r1 = yield *foo( 3 );
+                    console.log( r1 );
+                }
+
+                run( bar );
+
+        </script>
+    </body>
+</html>
